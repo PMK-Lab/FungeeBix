@@ -1,0 +1,16 @@
+[
+{
+  "modid": "fungeebix",
+  "name": "FungeeBix",
+  "description": "Adding compatibilities with BungeeCord on Forge",
+  "version": "${version}",
+  "mcversion": "${mcversion}",
+  "url": "",
+  "updateUrl": "",
+  "authorList": ["Clem_Fern","PumpMyKins"],
+  "credits": "",
+  "logoFile": "",
+  "screenshots": [],
+  "dependencies": []
+}
+]

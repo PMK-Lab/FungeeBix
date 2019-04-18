@@ -1,0 +1,19 @@
+{
+    "required": true,
+    "minVersion": "0.7.11",
+    "package": "fr.pmk.commons.fungeebix.mixins",
+    "refmap": "mixins.fungeebix.commons.refmap.json",
+    "target": "@env(DEFAULT)",
+    "compatibilityLevel": "JAVA_8",
+	"mixins": [
+    ],
+    "server": [
+        "MixinNetHandlerHandshakeTCP",
+        "MixinNetHandlerLoginServer",
+        "MixinNetworkManager",
+        "MixinC00Handshake"
+    ],
+	"injectors": {
+        "defaultRequire": 1
+    }
+}
