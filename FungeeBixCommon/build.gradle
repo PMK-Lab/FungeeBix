@@ -1,0 +1,58 @@
+// Gradle plugins
+buildscript {
+    repositories {
+        maven {
+            name = 'gradle-plugins'
+            url = 'https://plugins.gradle.org/m2'
+        }
+        maven {
+            name = 'sponge'
+            url = 'https://repo.spongepowered.org/maven'
+        }
+        maven {
+            name = 'forge'
+            url = 'http://files.minecraftforge.net/maven'
+        }
+    }
+
+    dependencies {
+        // VanillaGradle contains a custom ForgeGradle extension for SpongeCommon (see below)
+        classpath 'gradle.plugin.net.minecrell:vanillagradle:2.2-5'
+        classpath 'net.minecraftforge.gradle:ForgeGradle:2.3-SNAPSHOT'
+        classpath 'gradle.plugin.org.spongepowered:spongegradle:0.8.1'
+        classpath 'org.spongepowered:mixingradle:0.4-SNAPSHOT'
+    }
+}
+
+// Apply shared ForgeGradle configuration
+ext.common = project
+apply from: 'gradle/minecraft.gradle'
+
+// Inherit SpongeCommon version from SpongeAPI
+ext {
+}
+version = minecraftVersion + '-' + common.recommendedVersion
+
+
+dependencies {
+
+	compile 'org.ow2.asm:asm-debug-all:5.2'
+    compile 'org.spongepowered:mixin:0.7.11-SNAPSHOT'
+
+    forgeGradleMcDeps('net.minecraft:launchwrapper:1.11') {
+        transitive = false
+    }
+
+    
+}
+
+/*uploadArchives {
+    repositories {
+        mavenDeployer {
+            pom.whenConfigured {
+                pom -> pom.dependencies.removeAll { it.groupId == 'org.spongepowered' && it.artifactId == 'testplugins' }
+            }
+        }
+    }
+}*/
+
