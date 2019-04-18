@@ -1,0 +1,143 @@
+// Shared Gradle configuration for the Sponge ForgeGradle projects
+
+// Apply ForgeGradle plugin
+apply plugin: forgeGradlePlugin
+
+// Apply MixinGradle plugin to project
+apply plugin: 'org.spongepowered.mixin'
+
+repositories {
+	maven {
+        name = 'sponge'
+        url = 'http://repo.spongepowered.org/maven'
+	}
+}
+
+dependencies {
+    testCompile 'org.spongepowered:lwts:1.0.0'
+}
+
+minecraft {
+    version = minecraftVersion
+    mappings = common.mcpMappings
+
+    runDir = 'run'
+
+    // We don't use the obfuscated dev jar currently
+    makeObfSourceJar = false
+}
+
+// Mixins
+sourceSets {
+	main {
+    	ext.refMap = "mixins.fungeebix.commons.refmap.json"
+   	}
+}
+
+// Java 6 source set for compatibility checking
+sourceSets {
+    java6
+}
+
+// Compile options
+compileJava {
+    options.compilerArgs += '-Xlint:-processing'
+}
+
+compileJava6Java {
+    sourceCompatibility = '1.6'
+    targetCompatibility = '1.6'
+}
+
+// ForgeGradle 2 fails to apply transformer rules for classes it doesn't know of by default
+// We use the access transformer to make the catalogs in the API accessible
+deobfMcMCP { failOnAtError = false }
+deobfMcSRG { failOnAtError = false }
+
+// The access transformers we use
+ext.ats = ['common_at.cfg']
+
+// Set manifest entries
+jar {
+    // Include Java 6 classes
+    from sourceSets.java6.output
+
+    manifest {
+        attributes(
+                'Implementation-Title': project.name,
+                'Implementation-Version': "${-> project.version}",
+                'Implementation-Vendor': project.organization,
+
+                'FMLAT': "${-> project.ats.join(' ')}"
+        )
+    }
+}
+
+// Don't upload temp jar to Maven repository
+configurations.archives.artifacts.removeAll { it.archiveTask.is jar }
+
+task devJar(type: Jar) {
+    classifier = 'dev'
+    duplicatesStrategy = 'exclude' // Exclude duplicate LICENSE.txt file
+
+    // Inherit manifest from jar
+    manifest.from jar.manifest
+
+    // Include classes
+    from sourceSets.main.output
+    from sourceSets.java6.output
+
+}
+
+artifacts {
+    // Upload dev jar to Maven repository
+    archives devJar
+}
+
+task sourceJar(type: Jar, overwrite: true) {
+    classifier = 'sources'
+
+    // Include sources
+    from sourceSets.main.allSource
+    from sourceSets.java6.allSource
+
+}
+
+artifacts {
+    // Upload source jar to Maven repository
+    archives sourceJar
+}
+
+// Include SpongeAPI/SpongeCommon dependencies in our POM
+// Note: This is ugly, just keep scrolling
+/*uploadArchives.repositories.mavenDeployer.pom.whenConfigured {
+    dependencies.removeAll { it.artifactId == shadedDevProject.archivesBaseName }
+    def deps = new HashSet(dependencies.collect { it.groupId + ':' + it.artifactId })
+    dependencies.addAll(shadedDevProject.uploadArchives.repositories.mavenDeployer.pom.effectivePom.dependencies.findAll {
+        !deps.contains(it.groupId + ':' + it.artifactId) // Don't add the same dependency several times to the POM
+    })
+}*/
+
+configure([jar, devJar]) {
+
+}
+
+test {
+    workingDir = {test.temporaryDir}
+    systemProperty 'mixin.env.disableRefMap', 'true'
+}
+
+
+// Code style configuration
+/*sortAccessTransformers {
+    add sourceSets.main
+}*/
+
+/*license {
+    ext.name = 'Sponge'
+}*/
+
+// Use checkstyle suppressions from Common
+/*checkstyle {
+    configProperties['suppressions'] = common.file('checkstyle-suppressions.xml')
+}*/
